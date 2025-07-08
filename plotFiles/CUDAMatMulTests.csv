@@ -1,0 +1,17 @@
+Version,SquareMatrixDimension,TotalTime,TransfersTime
+numpy,1024,12.47,0
+cudaSimple,1024,18.68,4.83
+cudaTranspose,1024,17.43,9.69
+cudaShmem,1024,14.11,9.73
+numpy,2048,74.74,0
+cudaSimple,2048,116.03,21.82
+cudaTranspose,2048,58.83,16.14
+cudaShmem,2048,48.28,21.54
+numpy,4096,435.23,0
+cudaSimple,4096,746.85,63.28
+cudaTranspose,4096,359.47,86.99
+cudaShmem,4096,212.17,62.2
+numpy,8192,2975.87,0
+cudaSimple,8192,5422.57,254.81
+cudaTranspose,8192,2213.45,269.12
+cudaShmem,8192,1162.59,247.03

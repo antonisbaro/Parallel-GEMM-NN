@@ -1,0 +1,5 @@
+Version,NN_Test_Accuracy,TotalTime_s,TransfersTime_s,Transfers_to_Total_Time_ratio,speedup_to_numpy
+numpy,11.4%,9.091,0,0.0,1.0
+cudaSimple,11.4%,9.857,0.666,0.068,0.922
+cudaTranspose,11.4%,7.829,0.69,0.088,1.161
+cudaShmem,11.4%,6.781,0.693,0.102,1.341
