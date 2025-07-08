@@ -1,58 +1,73 @@
-# Παράλληλες Αρχιτεκτονικές Υπολογισμού για Μηχανική Μάθηση
+# Accelerating Neural Network Training with CPU & GPU Parallelism
 
-## Παραλληλοποίηση και Βελτιστοποίηση Εκπαίδευσης Νευρωνικού Δικτύου
+This repository contains the project for the "Parallel Computer Architectures for Machine Learning" course (NTUA). It provides an in-depth exploration of optimizing the General Matrix Multiply (GEMM) kernel, a critical computational bottleneck, to accelerate the training of a Multi-Layer Perceptron (MLP) on the MNIST dataset.
 
-Αυτό το αποθετήριο περιέχει την υλοποίηση και τα αποτελέσματα της εξαμηνιαίας εργασίας για το μάθημα "Παράλληλες Αρχιτεκτονικές Υπολογισμού για Μηχανική Μάθηση" του Δ.Π.Μ.Σ. "Επιστήμη Δεδομένων και Μηχανική Μάθηση" του Εθνικού Μετσόβιου Πολυτεχνείου.
-
----
-
-### 1. Σκοπός της Εργασίας
-
-Σκοπός της εργασίας είναι η μελέτη, παραλληλοποίηση και βελτιστοποίηση της εκπαίδευσης ενός νευρωνικού δικτύου (Multi-Layer Perceptron) για την αναγνώριση χειρόγραφων ψηφίων από τη βάση δεδομένων MNIST. Η ανάλυση εστιάζει στον πιο υπολογιστικά απαιτητικό πυρήνα της εκπαίδευσης, τον πολλαπλασιασμό πινάκων (General Matrix Multiply - GEMM), με στόχο την επίτευξη της μέγιστης δυνατής επιτάχυνσης.
-
-Η εργασία περιλαμβάνει:
-*   Παράλληλη υλοποίηση του GEMM σε **CPU** με `multiprocessing`.
-*   Βελτιστοποίηση του GEMM σε **GPU** με `numba.cuda`, εξερευνώντας τεχνικές όπως το memory coalescing και η χρήση shared memory.
-*   Ενσωμάτωση των βελτιστοποιημένων πυρήνων στην πλήρη ροή εκπαίδευσης ενός νευρωνικού δικτύου και αξιολόγηση της τελικής απόδοσης.
+The project implements and benchmarks parallel solutions from scratch, targeting both multi-core CPU architectures and massively parallel NVIDIA GPUs, demonstrating a deep dive into hardware-aware programming.
 
 ---
 
-### 2. Δομή του Αποθετηρίου
+## 🚀 Core Objectives & Features
 
-Το αποθετήριο είναι οργανωμένο ως εξής:
+-   **CPU Parallelization**:
+    -   Implemented a data-parallel GEMM algorithm using Python's **`multiprocessing`** library to leverage multi-core processors.
+    -   Utilized **`shared_memory`** to avoid costly data serialization overhead between processes.
+    -   Conducted scalability analysis to measure speedup and identify the limitations imposed by Amdahl's Law.
 
-*   `/report`: Περιέχει την τελική αναφορά της εργασίας σε μορφή PDF.
-*   `/CudaGPU`: Ο πηγαίος κώδικας για τις υλοποιήσεις του GEMM σε GPU (`Simple`, `Transpose`, `SharedMem`).
-*   `/Multiprocessing`: Ο πηγαίος κώδικας για την παράλληλη υλοποίηση του GEMM σε CPU.
-*   `/Sequential`: Η αρχική, σειριακή υλοποίηση του GEMM που χρησιμοποιήθηκε ως baseline.
-*   `/plotFiles`:
-    *   `/Plots`: Οι εικόνες των γραφημάτων που παράχθηκαν.
-    *   `/Plot Scripts`: Τα Python scripts που χρησιμοποιήθηκαν για τη δημιουργία των γραφημάτων.
-    *   `*.csv`: Τα αρχεία δεδομένων με τα αποτελέσματα των πειραμάτων.
-*   `/results`: Τα αρχεία εξόδου `.out` όπως παράχθηκαν από την εκτέλεση στο υπολογιστικό cluster.
-*   `nn.py` & `utilities.py`: Ο κώδικας του νευρωνικού δικτύου και βοηθητικές συναρτήσεις.
-*   `test*.py` & `run*.sh`: Τα scripts εκτέλεσης των πειραμάτων και υποβολής τους στο σύστημα ουρών Torque.
-*   `mnistDataset.npz`: Το σύνολο δεδομένων MNIST.
+-   **GPU Acceleration with CUDA & Numba**:
+    -   Developed three progressively optimized GEMM kernels for an **NVIDIA Tesla V100 GPU**:
+        -   **Naive Kernel**: A baseline implementation mapping one thread per output element.
+        -   **Coalesced Memory Access Kernel**: Optimized memory access patterns by transposing the thread-grid mapping to align with how GPUs read from global memory.
+        -   **Tiling with Shared Memory**: The most advanced kernel, which leverages fast on-chip shared memory to minimize slow global memory access, transforming the operation from **memory-bound** to **compute-bound**.
+
+-   **End-to-End Neural Network Integration**:
+    -   Integrated the custom-built GEMM kernels into a complete MLP training workflow.
+    -   Analyzed the final training speedup under two distinct workload scenarios: a memory-bound "validation" scenario and a compute-bound "high-throughput" scenario.
 
 ---
 
-### 3. Αναπαραγωγή Αποτελεσμάτων
+## 🛠️ Execution & Environment
 
-Όλα τα πειράματα και οι μετρήσεις απόδοσης πραγματοποιήθηκαν στο υπολογιστικό cluster του Εργαστηρίου Υπολογιστικών Συστημάτων του ΕΜΠ, σε έναν κόμβο με 2x Intel Xeon Silver 4114 CPUs και 1x NVIDIA Tesla V100 GPU. Η υποβολή των εργασιών έγινε μέσω του συστήματος ουρών **Torque**.
+All experiments were executed on a high-performance computing node (2x Intel Xeon Silver 4114 CPUs, 1x NVIDIA Tesla V100 GPU) via the **Torque (`qsub`)** job scheduling system.
 
-1.  **Εκτέλεση Πειραμάτων CPU:**
+### Reproducing the Experiments
+
+1.  **Run CPU Benchmarks**:
     ```bash
     qsub runMultiprocessingMatMul.sh
     ```
-2.  **Εκτέλεση Πειραμάτων GPU (GEMM):**
+2.  **Run GPU GEMM Benchmarks**:
     ```bash
     qsub runCUDAMatMul.sh
     ```
-3.  **Εκτέλεση Πειραμάτων Νευρωνικού Δικτύου:**
+3.  **Run Full Neural Network Training**:
     ```bash
     qsub runNNWithCustomMatMul.sh
     ```
-4.  **Δημιουργία Γραφημάτων:**
-    Τo jupyter notebook στον φάκελο `/plotFiles/Plot Scripts` μπορεί να εκτελεστεί για να δημιουργήσουν τα γραφήματα από τα αντίστοιχα αρχεία `.csv`.
+4.  **Generate Plots**:
+    The Jupyter Notebook located in `/plotFiles/Plot Scripts` can be executed to regenerate all plots from the resulting `.csv` files.
 
 ---
+
+## 📈 Key Findings
+
+-   **CPU vs. GPU**: While CPU parallelization provided significant speedup, it was limited by process management overhead. GPU parallelism, when properly optimized, delivered orders-of-magnitude higher performance.
+-   **GPU Optimization Impact**: The **tiling technique using shared memory** proved to be the most effective strategy for large matrices, achieving a **~2.5x speedup** over a highly optimized NumPy library on the CPU.
+-   **Workload-Dependent Performance**: The final analysis revealed that the optimal implementation depends heavily on the workload. For memory-bound tasks (many small operations), CPU-GPU data transfer overhead is the bottleneck. For compute-bound tasks (few large operations), the superior computational power of the tiled GPU kernel provides the greatest advantage.
+
+---
+
+## 💻 Technology Stack
+
+-   **Languages/Libraries**: Python, NumPy, Numba
+-   **Parallelism Paradigms**: CPU Multiprocessing, CUDA
+-   **Hardware**: Intel Xeon Multi-core CPU, NVIDIA Tesla V100 GPU
+-   **Job Scheduler**: Torque (`qsub`)
+
+---
+
+## ✍️ Authors
+
+*   Manousos Linardakis
+*   Lydia Ioanna Kolitsi
+*   Antonios Barotsakis
+*   Georgia Chatzigianni
